@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Mulți Ani, Sorin!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fdfaf4; --text-color: #7d6e6a; --primary-color: #b89f78;
+            --card-bg: #ffffff; --font-title: 'Playfair Display', serif; --font-body: 'Poppins', sans-serif;
+        }
+        body { margin: 0; font-family: var(--font-body); background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        .container { background-color: var(--card-bg); padding: 30px 35px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); width: 100%; max-width: 420px; text-align: center; border: 1px solid #f0e9dd; }
+        h1, h2 { font-family: var(--font-title); color: var(--primary-color); margin: 0 0 15px 0; }
+        h1 { font-size: 2.8rem; } h2 { font-size: 2rem; }
+        p { line-height: 1.7; font-size: 1rem; }
+        .button { background-color: var(--primary-color); color: var(--card-bg); border: none; padding: 15px 30px; font-size: 1.1rem; font-weight: 600; border-radius: 50px; cursor: pointer; margin-top: 20px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(184, 159, 120, 0.2); }
+        .button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(184, 159, 120, 0.3); }
+        .button:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
+        .button.secondary { background: none; border: 2px solid var(--primary-color); color: var(--primary-color); box-shadow: none; }
+        video { width: 100%; border-radius: 8px; margin-top: 15px; background-color: #000; }
+        .hidden { display: none; }
+        .loader { border: 4px solid #f0e9dd; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Stiluri noi pentru progress bar și countdown */
+        .progress-bar-container { width: 100%; background-color: #f0e9dd; border-radius: 30px; height: 10px; margin-top: 15px; overflow: hidden; }
+        .progress-bar { width: 100%; height: 100%; background-color: var(--primary-color); border-radius: 30px; transition: width 0.1s linear; }
+        .countdown { font-size: 1.5rem; font-weight: 600; color: var(--primary-color); margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Screen 1: Welcome -->
+        <div id="screen-start">
+            <h1>Salut, starule!</h1>
+            <p>Lasă-i lui Sorin o urare video de maximum 20 de secunde. Fii creativ, amuzant și memorabil!</p>
+            <button id="startButton" class="button">Înregistrează o amintire</button>
+        </div>
+        <!-- Screen 2: Recording -->
+        <div id="screen-recording" class="hidden">
+            <h2>Înregistrare...</h2>
+            <div class="countdown" id="countdown">20</div>
+            <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+            <video id="videoPreview" autoplay muted playsinline></video>
+            <button id="stopButton" class="button">Oprește & Trimite</button>
+        </div>
+        <!-- Screen 3: Uploading -->
+        <div id="screen-uploading" class="hidden">
+            <h2>Magie în progres...</h2>
+            <p>Trimitem urarea direct în seiful cu amintiri al lui Sorin. Nu fugi nicăieri!</p>
+            <div class="loader"></div>
+        </div>
+        <!-- Screen 4: Success -->
+        <div id="screen-success" class="hidden">
+            <h1>Gata! Misiune îndeplinită.</h1>
+            <p>Mesajul tău a fost trimis! Mulțumim din suflet. Acum, înapoi la petrecere, cocktail bar-ul te așteaptă!</p>
+            <button id="recordAgainButton" class="button secondary">Mai am ceva de zis!</button>
+        </div>
+    </div>
+
+<script>
+    const RECORDING_TIME_LIMIT_SECONDS = 20;
+
+    // Referințe DOM
+    const countdownEl = document.getElementById('countdown');
+    const progressBar = document.getElementById('progressBar');
+    const videoPreview = document.getElementById('videoPreview');
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const recordAgainButton = document.getElementById('recordAgainButton');
+    const screens = {
+        start: document.getElementById('screen-start'), recording: document.getElementById('screen-recording'),
+        uploading: document.getElementById('screen-uploading'), success: document.getElementById('screen-success'),
+    };
+
+    let mediaRecorder, recordedChunks = [], stream, timerInterval, startTime;
+
+    function showScreen(screenName) {
+        Object.values(screens).forEach(screen => screen.classList.add('hidden'));
+        screens[screenName].classList.remove('hidden');
+    }
+
+    function updateTimer() {
+        const elapsed = (Date.now() - startTime) / 1000;
+        const remaining = Math.max(0, RECORDING_TIME_LIMIT_SECONDS - elapsed);
+        
+        countdownEl.textContent = Math.ceil(remaining);
+        progressBar.style.width = `${(remaining / RECORDING_TIME_LIMIT_SECONDS) * 100}%`;
+
+        if (remaining <= 0) {
+            stopRecording();
+        }
+    }
+
+    async function startRecording() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            videoPreview.srcObject = stream;
+            
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            mediaRecorder.ondataavailable = event => {
+                if (event.data.size > 0) recordedChunks.push(event.data);
+            };
+            
+            mediaRecorder.onstop = () => {
+                const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+                uploadToS3(videoBlob);
+                recordedChunks = [];
+                stream.getTracks().forEach(track => track.stop());
+            };
+            
+            mediaRecorder.start();
+            showScreen('recording');
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 100);
+        } catch (error) {
+            console.error("Eroare camera:", error);
+            alert("Nu am putut accesa camera. Asigură-te că ai permis accesul.");
+        }
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            clearInterval(timerInterval);
+            mediaRecorder.stop();
+        }
+    }
+    
+    async function uploadToS3(blob) {
+        showScreen('uploading');
+        try {
+            // Pas 1: Obține URL-ul de upload de la backend-ul nostru
+            const response = await fetch('/api/generate-upload-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileType: blob.type })
+            });
+            const { uploadUrl, key } = await response.json();
+            
+            // Pas 2: Încarcă fișierul direct în S3 folosind URL-ul pre-semnat
+            const uploadResponse = await fetch(uploadUrl, {
+                method: 'PUT',
+                headers: { 'Content-Type': blob.type },
+                body: blob
+            });
+
+            if (!uploadResponse.ok) throw new Error('Upload-ul către S3 a eșuat.');
+            
+            console.log('Video încărcat cu succes:', key);
+            showScreen('success');
+
+        } catch (error) {
+            console.error("Eroare la upload:", error.message);
+            alert("Hopa! A apărut o eroare. Mai încearcă, Sorin merită!");
+            showScreen('start');
+        }
+    }
+
+    startButton.addEventListener('click', startRecording);
+    stopButton.addEventListener('click', stopRecording);
+    recordAgainButton.addEventListener('click', () => {
+        progressBar.style.width = '100%';
+        countdownEl.textContent = RECORDING_TIME_LIMIT_SECONDS;
+        showScreen('start');
+    });
+</script>
+</body>
+</html>

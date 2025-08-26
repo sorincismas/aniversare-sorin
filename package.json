@@ -1,0 +1,9 @@
+{
+  "name": "urari-s3-uploader",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.370.0",
+    "@aws-sdk/s3-request-presigner": "^3.370.0"
+  }
+}

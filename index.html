@@ -32,35 +32,41 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Screen 1: Welcome -->
-        <div id="screen-start">
-            <h1><b>🥳 Hei, superstar!</b></h1>
-            <p>Sorin tocmai a lansat sezonul 40 din serialul vieții lui, iar tu ai șansa să apari în episodul special! 🎬</p>
-            <p>Trimite-i o urare video scurtă (maxim 20 secunde) — cu glume, dans, shot-uri sau ce-ți trece prin cap 🤩. Important e să fie funny, memorabil și demn de o petrecere de Oscar 🍾.</p>
-            <button id="startButton" class="button">👉 Înregistrează acum și intră în distribuția “Sorin - Level 40”!</button>
-        </div>
-        <!-- Screen 2: Recording -->
-        <div id="screen-recording" class="hidden">
-            <h2>Înregistrare...</h2>
-            <div class="countdown" id="countdown">20</div>
-            <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
-            <video id="videoPreview" autoplay muted playsinline></video>
-            <button id="stopButton" class="button">Oprește & Trimite</button>
-        </div>
-        <!-- Screen 3: Uploading -->
-        <div id="screen-uploading" class="hidden">
-            <h2>Magie în progres...</h2>
-            <p>Trimitem urarea direct în seiful cu amintiri al lui Sorin. Nu fugi nicăieri!</p>
-            <div class="loader"></div>
-        </div>
-        <!-- Screen 4: Success -->
-        <div id="screen-success" class="hidden">
-            <h1>Gata! Misiune îndeplinită.</h1>
-            <p>Mesajul tău a fost trimis! Mulțumim din suflet. Acum, înapoi la petrecere, cocktail bar-ul te așteaptă!</p>
-            <button id="recordAgainButton" class="button secondary">Mai am ceva de zis!</button>
-        </div>
+    <!-- Screen 1: Welcome -->
+    <div id="screen-start">
+        <h1><b>🥳 Hei, superstar!</b></h1>
+        <p>✨ Sorin tocmai a lansat <b>Level 40</b> și tu ai loc în episodul aniversar! 🎬🍾</p>
+        <p>🎉 Lasă-i o urare video scurtă (max 20 secunde) — cu glume 🤪, dans 💃🕺, shot-uri 🥃 sau orice idee trăsnită 🚀. 
+        Fă-l să râdă și să-și amintească peste ani! 😎</p>
+        <button id="startButton" class="button">👉 Intră în distribuția “Sorin - Level 40”! ⭐</button>
     </div>
+
+    <!-- Screen 2: Recording -->
+    <div id="screen-recording" class="hidden">
+        <h2>🎥 Camera e a ta!</h2>
+        <p>⏳ Ai 20 de secunde să strălucești 🌟 — fii funny 😂, spontan(ă) 🙌 și dă vibe de party 🥳🔥!</p>
+        <div class="countdown" id="countdown">20</div>
+        <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+        <video id="videoPreview" autoplay muted playsinline></video>
+        <button id="stopButton" class="button">✅ Gata, trimite! 🚀</button>
+    </div>
+
+    <!-- Screen 3: Uploading -->
+    <div id="screen-uploading" class="hidden">
+        <h2>✨ Magia se întâmplă...</h2>
+        <p>📤 Clipul tău urcă direct în <b>Seiful Amintirilor lui Sorin</b> 🔒.  
+        Stai chill 😌, durează doar câteva secunde! ⏳</p>
+        <div class="loader"></div>
+    </div>
+
+    <!-- Screen 4: Success -->
+    <div id="screen-success" class="hidden">
+        <h1>🎉 Mission complete! ✅</h1>
+        <p>💌 Urarea ta a ajuns la Sorin! Mulțumim că ai pus vibe-ul tău în Level 40 🕺💃.  
+        Acum fugi la bar 🍹🥂 — cocktailul tău te așteaptă! 😉</p>
+        <button id="recordAgainButton" class="button secondary">➕ Mai bag un mesaj! 🎬</button>
+    </div>
+
 
 <script>
     const RECORDING_TIME_LIMIT_SECONDS = 20;
